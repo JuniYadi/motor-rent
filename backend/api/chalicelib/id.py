@@ -21,3 +21,9 @@ def genRandomRangka(size = 17):
     randomized_mixed = ''.join(mixed_list)
     
     return randomized_mixed
+
+def genStockRandom():
+    return random.randint(1, 15)
+
+def genStatusRandom():
+    return random.choice(['TERSEDIA', 'DIPINJAM', 'PERBAIKAN', 'RUSAK'])
