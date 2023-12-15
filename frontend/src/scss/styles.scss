@@ -1,0 +1,8 @@
+// Import all of Bootstrap's CSS
+@import "~bootstrap/scss/bootstrap";
+
+@media (max-width: 600px) {
+  .hide-on-mobile {
+    display: none;
+  }
+}
