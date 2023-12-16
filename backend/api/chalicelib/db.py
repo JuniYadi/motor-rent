@@ -13,14 +13,17 @@ def query(pk, **kwargs):
       skType = kwargs['skType'] if 'skType' in kwargs else None
       skValue = kwargs['skValue'] if 'skValue' in kwargs else None
       query = None
+      count = kwargs['count'] if 'count' in kwargs else False
 
       if skType is None and skValue is None:
         query = table.query(
-          KeyConditionExpression=Key('pk').eq(pk)
+          KeyConditionExpression=Key('pk').eq(pk),
+          Select='COUNT' if count else 'ALL_ATTRIBUTES'
         )
       elif skType is not None and skValue is not None and skType == 'sk':
         query = table.query(
-          KeyConditionExpression=Key('pk').eq(pk) & Key(skType).begins_with(skValue)
+          KeyConditionExpression=Key('pk').eq(pk) & Key(skType).begins_with(skValue),
+          Select='COUNT' if count else 'ALL_ATTRIBUTES'
         )
 
       elif skType is not None and skValue is not None and skType != 'sk':
@@ -35,18 +38,14 @@ def query(pk, **kwargs):
 
         query = table.query(
           KeyConditionExpression=Key('pk').eq(pk) & Key(skType).begins_with(skValue),
-          IndexName=indexName
+          IndexName=indexName,
+          Select='COUNT' if count else 'ALL_ATTRIBUTES'
         )
-      
-      # Delete Object from response
-      for item in query['Items']:
-        del item['pk']
-        del item['sk']
-        del item['ls1sk']
-        del item['ls2sk']
-        del item['ls3sk']
 
-      return query['Items']
+      if count:
+        return query['Count']
+      else:
+        return query['Items']
     
     except Exception as e:
       print(f"Error Querying Data: {e}")
