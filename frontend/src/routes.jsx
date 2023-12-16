@@ -4,7 +4,9 @@ import { createBrowserRouter } from "react-router-dom";
 import { App } from "./App";
 import { AppPrivate } from "./AppPriv";
 import NotFound from "./components/NotFound";
+import Redirect from "./components/Redirect";
 const Home = lazy(() => import("./pages/home"));
+const Motors = lazy(() => import("./pages/motors"));
 const UserNotes = lazy(() => import("./pages/user/notes"));
 const AdminNotes = lazy(() => import("./pages/admin/notes"));
 const About = lazy(() => import("./pages/about"));
@@ -41,6 +43,19 @@ export const router = createBrowserRouter([
       {
         path: "about",
         element: <About />,
+      },
+      {
+        path: "motors",
+        children: [
+          {
+            path: "",
+            element: <Redirect to="/" />,
+          },
+          {
+            path: ":type",
+            element: <Motors />,
+          },
+        ],
       },
     ],
   },
