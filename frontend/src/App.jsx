@@ -1,12 +1,80 @@
-import { Suspense } from "react";
-
-import Container from "react-bootstrap/Container";
+import { Suspense, useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { APP_NAME } from "./statics";
-import { Button } from "react-bootstrap";
+import { Button, Container, Nav, NavDropdown } from "react-bootstrap";
+import {
+  getCurrentUser,
+  signOut,
+  fetchUserAttributes,
+  fetchAuthSession,
+} from "aws-amplify/auth";
+import SHA256 from "crypto-js/sha256";
+import { withAuthenticator } from "@aws-amplify/ui-react";
 
 export const App = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState({
+    username: "",
+    email: "",
+    gravatar: "",
+    isVerified: false,
+    isAdmin: false,
+    tokens: {},
+  });
+  const navigate = useNavigate();
+
+  const onSignOut = async (e) => {
+    e.preventDefault();
+
+    setUser({
+      username: "",
+      email: "",
+      gravatar: "",
+      isVerified: false,
+      isAdmin: false,
+      tokens: {},
+    });
+    setIsAuthenticated(false);
+
+    await signOut();
+    window.href.location = "/";
+  };
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const user = await getCurrentUser();
+        // set isAuthenticated to true
+        setIsAuthenticated(true);
+
+        const attributes = await fetchUserAttributes(user);
+        const { idToken } = (await fetchAuthSession()).tokens || {};
+
+        // get cognito groups
+        const groups = idToken?.payload["cognito:groups"] || [];
+
+        // hash email for gravatar
+        const emailHash = SHA256(
+          attributes?.email.toLocaleLowerCase()
+        ).toString();
+
+        setUser({
+          username: user?.username,
+          email: attributes?.email,
+          gravatar: `https://www.gravatar.com/avatar/${emailHash}?s=45&d=identicon`,
+          isVerified: attributes?.email_verified,
+          isAdmin: groups.includes("administrator"),
+          tokens: idToken?.toString(),
+        });
+      } catch (err) {
+        setIsAuthenticated(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
   return (
     <>
       <div className="container py-2">
@@ -39,55 +107,71 @@ export const App = () => {
               >
                 Support
               </Link>
-              <Button variant="primary" className="mx-2">
-                Login / Register
-              </Button>
+              {isAuthenticated ? (
+                <>
+                  <Nav>
+                    <NavDropdown
+                      title={
+                        <>
+                          <span className="m-2">{user?.email}</span>
+
+                          <picture>
+                            <img
+                              src={user?.gravatar}
+                              alt="avatar"
+                              className="rounded-circle hide-on-mobile"
+                              width="32"
+                              height="100%"
+                            />
+                          </picture>
+                        </>
+                      }
+                      id="collapsible-nav-dropdown"
+                    >
+                      <NavDropdown.Item href="#grant">
+                        Status{" "}
+                        {user?.isVerified ? "Verified ✅" : "Unverified ❌"}
+                      </NavDropdown.Item>
+                      <NavDropdown.Divider />
+                      
+                      {user?.isAdmin && (
+                        <>
+                          <NavDropdown.Item href="#grant">
+                            Admin Access
+                          </NavDropdown.Item>
+                          <NavDropdown.Divider />
+                        </>
+                      )}
+
+                      <NavDropdown.Item href="#signout" onClick={onSignOut}>
+                        Logout
+                      </NavDropdown.Item>
+                    </NavDropdown>
+                  </Nav>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="primary"
+                    className="me-3 py-2"
+                    size="sm"
+                    onClick={() => navigate("/app")}
+                  >
+                    Login
+                  </Button>
+                </>
+              )}
             </nav>
           </div>
         </header>
       </div>
 
-      {/* <Navbar
-        collapseOnSelect
-        expand="lg"
-        sticky="top"
-        bg="primary"
-        data-bs-theme="dark"
-      >
-        <Container>
-          <Navbar.Brand href="/">{APP_NAME}</Navbar.Brand>
-          <Navbar.Toggle aria-controls="responsive-navbar-nav" />
-          <Navbar.Collapse id="responsive-navbar-nav">
-            <Nav className="me-auto">
-              <Nav.Link as={Link} to="/">
-                Home
-              </Nav.Link>
-              <Nav.Link as={Link} to="/lists">
-                My Notes
-              </Nav.Link>
-              <Nav.Link
-                href="https://forms.gle/rQkyMrvbeACoFTny9"
-                target="_blank"
-              >
-                Isi Survey
-              </Nav.Link>
-              <Nav.Link as={Link} to="/about">
-                About Us
-              </Nav.Link>
-            </Nav>
-            <Nav>
-              <Nav.Link as={Link} to="/app">
-                Login / Register
-              </Nav.Link>
-            </Nav>
-          </Navbar.Collapse>
-        </Container>
-      </Navbar> */}
       <Container>
         <Suspense fallback={<div>Loading...</div>}>
           <Outlet />
         </Suspense>
       </Container>
+
       <footer className="my-5 pt-5 text-body-secondary text-center text-small">
         <p className="mb-1">
           &copy; {new Date().getFullYear()} {APP_NAME}
@@ -99,11 +183,10 @@ export const App = () => {
           <li className="list-inline-item">
             <a href="#">Terms</a>
           </li>
-          <li className="list-inline-item">
-            <a href="#">Support</a>
-          </li>
         </ul>
       </footer>
     </>
   );
 };
+
+export const AppPrivate = withAuthenticator(App);
