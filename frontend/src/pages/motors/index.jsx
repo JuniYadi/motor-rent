@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import sortBy from "sort-by";
 import { Col, Row, Form } from "react-bootstrap";
+import { Helmet } from "react-helmet-async";
 
-import { API_URL } from "../../statics";
+import { API_URL, APP_NAME } from "../../statics";
+import { capitalize } from "../../utils/text";
 
 export default function Motors() {
   const { type } = useParams();
@@ -31,7 +33,11 @@ export default function Motors() {
 
   return (
     <>
-      <h1 className="text-capitalize">Motor {type}</h1>
+      <Helmet>
+        <title>{`Motor ${capitalize(type)} - ${APP_NAME}`}</title>
+      </Helmet>
+
+      <h2 className="text-capitalize">Motor {type}</h2>
 
       <div className="album bg-body-tertiary my-4">
         <div className="container">
@@ -87,7 +93,9 @@ export default function Motors() {
                               className="btn btn-sm btn-outline-primary"
                               disabled={item.stocks <= 0}
                               onClick={() =>
-                                navigate(`/motors/${item.name.toLowerCase()}`)
+                                navigate(
+                                  `/app/order/new?mtId=${item.id}&name=${item.name}&category=${item.category}`
+                                )
                               }
                             >
                               {item.stocks > 0 ? <>Order</> : <>Stock Kosong</>}

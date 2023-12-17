@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { TypeAnimation } from "react-type-animation";
-import { API_URL } from "../../statics";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
+
+import { API_URL, APP_NAME } from "../../statics";
 
 export default function Home() {
   const [category, setCategory] = useState([]);
@@ -22,14 +24,15 @@ export default function Home() {
       setCategory(data);
     };
 
-    console.log("running for the first time");
     getStocks();
-
-    console.log(category);
   }, []);
 
   return (
     <>
+      <Helmet>
+        <title className="text-capitalize">{`Homepage - ${APP_NAME}`}</title>
+      </Helmet>
+
       <section className="py-2 text-center container">
         <div className="row py-lg-5">
           <div className="col-lg-6 col-md-8 mx-auto">
@@ -92,7 +95,11 @@ export default function Home() {
                                 navigate(`/motors/${item.name.toLowerCase()}`)
                               }
                             >
-                              {item.stocks > 0 ? <>Order</> : <>Stock Kosong</>}
+                              {item.stocks > 0 ? (
+                                <>Pilih Tipe Motor</>
+                              ) : (
+                                <>Stock Kosong</>
+                              )}
                             </button>
                           </div>
                           <small>
