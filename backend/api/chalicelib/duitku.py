@@ -76,7 +76,7 @@ def duitku_create(**kwargs):
     "customerVaName": kwargs['customer_name'],
     "email": kwargs['customer_email'],
     "callbackUrl": "https://api-motorent.tugas.dev/callback",
-    "returnUrl": "https://motorent.tugas.dev/return",
+    "returnUrl": f"https://motorent.tugas.dev/order/{kwargs['order_id']}",
     "expiryPeriod": 120,
   }
 

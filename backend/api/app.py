@@ -210,7 +210,7 @@ def order_index():
         }, status_code=code, headers=contentTypes['object'])
 
 @app.route('/orders/{id}', methods=['GET'], cors=True, authorizer=authorizer)
-def order_index(id):
+def order_detail(id):
     code = 200
 
     try:
@@ -223,9 +223,9 @@ def order_index(id):
             code = 404
             raise Exception('Data not found')
         
-        if data['userId'] != userId:
-            code = 401
-            raise Exception('Unauthorized')
+        if 'userId' not in data or data['userId'] != userId:
+            code = 403
+            raise Exception('Forbidden')
             
         return Response(body={
             'code': code,
