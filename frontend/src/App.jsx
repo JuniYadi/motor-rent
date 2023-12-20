@@ -12,6 +12,8 @@ import {
 import SHA256 from "crypto-js/sha256";
 import { withAuthenticator } from "@aws-amplify/ui-react";
 
+import { UserContext } from "./contexts";
+
 export const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState({
@@ -60,8 +62,11 @@ export const App = () => {
         ).toString();
 
         setUser({
+          name: attributes?.name,
           username: user?.username,
           email: attributes?.email,
+          phone_number: attributes?.phone_number,
+          phone_number_verified: attributes?.phone_number_verified,
           gravatar: `https://www.gravatar.com/avatar/${emailHash}?s=45&d=identicon`,
           isVerified: attributes?.email_verified,
           isAdmin: groups.includes("administrator"),
@@ -113,7 +118,7 @@ export const App = () => {
                     <NavDropdown
                       title={
                         <>
-                          <span className="m-2">{user?.email}</span>
+                          <span className="m-2">{user?.name}</span>
 
                           <picture>
                             <img
@@ -133,7 +138,7 @@ export const App = () => {
                         {user?.isVerified ? "Verified ✅" : "Unverified ❌"}
                       </NavDropdown.Item>
                       <NavDropdown.Divider />
-                      
+
                       {user?.isAdmin && (
                         <>
                           <NavDropdown.Item href="#grant">
@@ -167,9 +172,11 @@ export const App = () => {
       </div>
 
       <Container>
-        <Suspense fallback={<div>Loading...</div>}>
-          <Outlet />
-        </Suspense>
+        <UserContext.Provider value={user}>
+          <Suspense fallback={<div>Loading...</div>}>
+            <Outlet />
+          </Suspense>
+        </UserContext.Provider>
       </Container>
 
       <footer className="my-5 pt-5 text-body-secondary text-center text-small">
@@ -189,4 +196,18 @@ export const App = () => {
   );
 };
 
-export const AppPrivate = withAuthenticator(App);
+export const AppPrivate = withAuthenticator(App, {
+  formFields: {
+    signUp: {
+      name: {
+        required: true,
+        type: "text",
+        minLength: 3,
+        maxLength: 255,
+      },
+      phone_number: {
+        required: true,
+      },
+    },
+  },
+});
