@@ -1,9 +1,10 @@
 from chalice import Chalice, CognitoUserPoolAuthorizer, Response
-from chalicelib.db import query, store, show
+from chalicelib.db import query, store, show, update
 from chalicelib.id import id
-from chalicelib.duitku import duitku_create, duitku_payment_code
+from chalicelib.duitku import duitku_create, duitku_payment_code, duitku_singature_validate
 from datetime import datetime
 from chalicelib.cleanup import clearResponse
+from urllib.parse import parse_qs
 
 app = Chalice(app_name='motorent-api')
 
@@ -41,18 +42,76 @@ def location_detail():
     }, status_code=code, headers=contentTypes['object'])
 
 
-@app.route('/callback', methods=['GET', 'POST'], cors=True)
+@app.route('/callback', methods=['GET', 'POST'], cors=True, content_types=["application/x-www-form-urlencoded"])
 def location_detail():
-    
-    current_request = app.current_request
+    try:
+        current_request = app.current_request
+        body = parse_qs(app.current_request.raw_body.decode())
 
-    print("query_params", current_request.query_params)
-    print("json_body", current_request.json_body)
+        merchantOrderId = body.get("merchantOrderId", None)
+        reference = body.get("reference", None)
+        paymentCode = body.get("paymentCode", None)
+        signature = body.get("signature", None)
+        amount = body.get("amount", None)
+        publisherOrderId = body.get("publisherOrderId", None)
+        settlementDate = body.get("settlementDate", None)
 
-    return Response(body={
-        'code': 200,
-        'message': 'success'
-    }, status_code=200, headers=contentTypes['object'])
+        validateSignature = duitku_singature_validate(signature, merchantOrderId=merchantOrderId, paymentAmount=amount)
+
+        if validateSignature == False:
+            raise Exception('Signature not valid')
+        
+        getData = show({"pk": "ORDERS", "sk": merchantOrderId})
+
+        if getData == False:
+            raise Exception('OrderID not found')
+            
+        status = "LUNAS"
+        userId = getData['userId']
+        now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+
+        update(pk='ORDERS', sk=merchantOrderId,
+                UpdateExpression="SET #status = :status, #ls2sk = :ls2sk, #ls3sk = :ls3sk, #updatedAt = :updatedAt",
+                ExpressionAttributeNames={
+                    "#status": "status", "#ls2sk": "ls2sk", "#ls3sk": "ls3sk", "#updatedAt": "updatedAt"
+                },
+                ExpressionAttributeValues={
+                    ":status": status,
+                    ":ls2sk": f"{userId}#{status}",
+                    ":ls3sk": f"{status}#{now}",
+                    ":updatedAt": now
+                    }
+                )
+        
+        store({
+            "pk": "PAYMENTS",
+            "sk": reference,
+            "ls1sk": f"{merchantOrderId}",
+            "ls2sk": f"{userId}#{merchantOrderId}",
+            "ls3sk": f"{status}#{now}",
+            "userId": userId,
+            "orderId": merchantOrderId,
+            "reference": reference,
+            "paymentCode": paymentCode,
+            "publisherOrderId": publisherOrderId,
+            "amount": amount,
+            "status": status,
+            "settlementDate": settlementDate,
+            "createdAt": now,
+            "updatedAt": now
+        })
+
+        return Response(body={
+            'code': 200,
+            'message': 'success',
+        }, status_code=200)
+    except Exception as e:
+        return Response(body={
+            'code': 500,
+            'message': str(e),
+            'data': None,
+        }, status_code=500)    
+
 
 @app.route('/motors', methods=['GET'], cors=True)
 def motors_index():
@@ -123,25 +182,65 @@ def motors_shows(type_motor):
         'data': clearResponse(data)
     }, status_code=code, headers=contentTypes['object'])
 
-@app.route('/orders', methods=['GET'], cors=True, authorizer=authorizer, content_types=contentTypes['array'])
+@app.route('/orders', methods=['GET'], cors=True, authorizer=authorizer)
 def order_index():
     code = 200
-    message = 'success'
-    context = app.current_request.context['authorizer']['claims']
-    userId = context['sub']
 
-    data = query('ORDERS', skType='ls1sk', skValue=userId)
+    try:
+        context = app.current_request.context['authorizer']['claims']
+        userId = context['sub']
 
-    if data == False:
-        code = 404
-        message = 'Data not found'
-        data = None
+        data = query('ORDERS', skType='ls1sk', skValue=str(userId))
+
+        if data == False:
+            code = 404
+            raise Exception('Data not found')
+            
+        return Response(body={
+            'code': code,
+            'message': 'success',
+            'data': clearResponse(data)
+        }, status_code=code, headers=contentTypes['object'])
+    
+    except Exception as e:
+        return Response(body={
+            'code': code,
+            'message': str(e),
+            'data': None,
+        }, status_code=code, headers=contentTypes['object'])
+
+@app.route('/orders/{id}', methods=['GET'], cors=True, authorizer=authorizer)
+def order_index(id):
+    code = 200
+
+    try:
+        context = app.current_request.context['authorizer']['claims']
+        userId = context['sub']
+
+        data = show({ "pk": "ORDERS", "sk": id })
+
+        if data == False:
+            code = 404
+            raise Exception('Data not found')
         
-    return Response(body={
-        'code': code,
-        'message': message,
-        'data': clearResponse(data)
-    }, status_code=code, headers=contentTypes['object'])
+        if data['userId'] != userId:
+            code = 401
+            raise Exception('Unauthorized')
+            
+        return Response(body={
+            'code': code,
+            'message': 'success',
+            'data': clearResponse(data)
+        }, status_code=code, headers=contentTypes['object'])
+    
+    except Exception as e:
+        print(e)
+
+        return Response(body={
+            'code': code,
+            'message': str(e),
+            'data': None,
+        }, status_code=code, headers=contentTypes['object'])
 
 @app.route('/orders', methods=['POST'], cors=True, authorizer=authorizer, content_types=contentTypes['array'])
 def order_create():
@@ -172,6 +271,7 @@ def order_create():
         data['ls1sk'] = f"{userId}#{genenerateID}"
         data['ls2sk'] = f"{userId}#{status}"
         data['ls3sk'] = f"{status}#{createdAt}"
+        data['userId'] = userId
         data['id'] = genenerateID
         data['total'] = (int(body['days']) * int(body['motor_price'])) + int(body['pickup_location_fee']) + int(body['dropoff_location_fee'])
         data['status'] = status

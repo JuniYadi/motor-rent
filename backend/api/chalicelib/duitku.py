@@ -58,6 +58,14 @@ def duitku_payment_code(code):
 
   return result
 
+def duitku_signature(**kwargs):
+  return hashlib.md5((DUITKU_MERCHANT_CODE + kwargs['merchantOrderId'] + str(kwargs['paymentAmount']) + DUITKU_API_KEY).encode('utf-8')).hexdigest()
+
+def duitku_singature_validate(sign, **kwargs):
+  signature = duitku_signature(**kwargs)
+
+  return signature == sign
+
 def duitku_create(**kwargs):
   payload = { 
     "merchantCode": DUITKU_MERCHANT_CODE,
@@ -67,12 +75,12 @@ def duitku_create(**kwargs):
     "productDetails": kwargs['product_details'],
     "customerVaName": kwargs['customer_name'],
     "email": kwargs['customer_email'],
-    "callbackUrl": "https://motorent.tugas.dev/callback",
+    "callbackUrl": "https://api-motorent.tugas.dev/callback",
     "returnUrl": "https://motorent.tugas.dev/return",
     "expiryPeriod": 120,
   }
 
-  payload['signature'] = hashlib.md5((payload['merchantCode'] + payload['merchantOrderId'] + str(payload['paymentAmount']) + DUITKU_API_KEY).encode('utf-8')).hexdigest()
+  payload['signature'] = duitku_signature(**payload)
 
   response = requests.post(DUITKU_URI, json=payload)
 

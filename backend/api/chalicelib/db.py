@@ -74,6 +74,30 @@ def show(data):
 
     return query['Item']
 
+def update(**kwargs):
+  pk = kwargs['pk'] if 'pk' in kwargs else None
+  sk = kwargs['sk'] if 'sk' in kwargs else None
+
+  if pk is None or sk is None:
+    return False
+  
+  try:
+    table.update_item(
+      Key={
+        'pk': pk,
+        'sk': sk
+      },
+      UpdateExpression=kwargs['UpdateExpression'],
+      ExpressionAttributeNames=kwargs['ExpressionAttributeNames'],
+      ExpressionAttributeValues=kwargs['ExpressionAttributeValues'],
+      ReturnValues="UPDATED_NEW"
+    )
+    
+    return True
+  except Exception as e:
+    print(f"Error Updating Data: {e}")
+    return False
+
 def delete(data):
     try:
       table.delete_item(Key=data)
