@@ -3,7 +3,7 @@ from boto3.dynamodb.conditions import Key, Attr
 import logging
 
 logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 ddb = boto3.resource('dynamodb')
 table = ddb.Table('motorent-tugas-dev-prod')

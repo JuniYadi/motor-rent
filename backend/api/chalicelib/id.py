@@ -1,5 +1,9 @@
+from ulid import ULID
 from nanoid import generate
 import random
+
+def id():
+    return str(ULID())
 
 def genID(size = 6):
     return generate('123456789abcdefABCDEF', size)
