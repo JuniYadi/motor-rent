@@ -6,6 +6,7 @@ import { Helmet } from "react-helmet-async";
 
 import { API_URL, APP_NAME } from "../../statics";
 import { capitalize } from "../../utils/text";
+import { rupiah } from "../../utils/currency";
 
 export default function Motors() {
   const { type } = useParams();
@@ -21,15 +22,6 @@ export default function Motors() {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const rupiah = (number) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(number);
-  };
 
   return (
     <>

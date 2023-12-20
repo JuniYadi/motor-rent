@@ -8,6 +8,7 @@ const Home = lazy(() => import("./pages/home"));
 const Motors = lazy(() => import("./pages/motors"));
 const Order = lazy(() => import("./pages/order"));
 const OrderNew = lazy(() => import("./pages/order/new"));
+const OrderDetail = lazy(() => import("./pages/order/detail"));
 
 const UserNotes = lazy(() => import("./pages/user/notes"));
 const AdminNotes = lazy(() => import("./pages/admin/notes"));
@@ -43,6 +44,10 @@ export const router = createBrowserRouter([
           {
             path: "new",
             element: <OrderNew />,
+          },
+          {
+            path: ":id",
+            element: <OrderDetail />,
           },
         ],
       },
