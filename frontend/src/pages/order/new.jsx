@@ -13,6 +13,7 @@ import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import duration from "dayjs/plugin/duration";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { metodePembayaran } from "../../utils/payments";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -404,11 +405,13 @@ export default function OrderNew() {
                     required
                   >
                     <option value="">Pilih Metode Pembayaran</option>
-                    <option value="cash">Cash</option>
-                    <option value="va-bca">Virtual Account BCA</option>
-                    <option value="va-bri">Virtual Account BRI</option>
-                    <option value="va-bni">Virtual Account BNI</option>
-                    <option value="va-mandiri">Virtual Account MANDIRI</option>
+                    {metodePembayaran.map((item, index) => {
+                      return (
+                        <option key={index} value={item.slug}>
+                          {item.name}
+                        </option>
+                      );
+                    })}
                   </Form.Select>
                 </Col>
               </Form.Group>

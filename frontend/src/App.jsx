@@ -104,16 +104,16 @@ export const App = () => {
                 to="#"
                 className="me-3 py-2 link-body-emphasis text-decoration-none"
               >
-                Pricing
-              </Link>
-              <Link
-                to="#"
-                className="me-3 py-2 link-body-emphasis text-decoration-none"
-              >
                 Support
               </Link>
               {isAuthenticated ? (
                 <>
+                  <Link
+                    to="/app/order"
+                    className="me-3 py-2 link-body-emphasis text-decoration-none"
+                  >
+                    My Order
+                  </Link>
                   <Nav>
                     <NavDropdown
                       title={
@@ -172,11 +172,11 @@ export const App = () => {
       </div>
 
       <Container>
-        <UserContext.Provider value={user}>
-          <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<div>Loading...</div>}>
+          <UserContext.Provider value={user}>
             <Outlet />
-          </Suspense>
-        </UserContext.Provider>
+          </UserContext.Provider>
+        </Suspense>
       </Container>
 
       <footer className="my-5 pt-5 text-body-secondary text-center text-small">
