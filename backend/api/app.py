@@ -48,6 +48,8 @@ def location_detail():
         current_request = app.current_request
         body = parse_qs(app.current_request.raw_body.decode())
 
+        print("callback", body)
+
         merchantOrderId = body.get("merchantOrderId", None)
         reference = body.get("reference", None)
         paymentCode = body.get("paymentCode", None)
@@ -293,7 +295,6 @@ def order_create():
                 customer_name=body['name'],
                 customer_email=body['email'],
             )
-            print(duitkuResult)
             result['paymentUrl'] = duitkuResult['paymentUrl']
         
         return Response(body={
