@@ -22,7 +22,7 @@ export const App = () => {
     gravatar: "",
     isVerified: false,
     isAdmin: false,
-    tokens: {},
+    tokens: null,
   });
   const navigate = useNavigate();
 
@@ -35,7 +35,7 @@ export const App = () => {
       gravatar: "",
       isVerified: false,
       isAdmin: false,
-      tokens: {},
+      tokens: null,
     });
     setIsAuthenticated(false);
 
@@ -160,7 +160,7 @@ export const App = () => {
                     variant="primary"
                     className="me-3 py-2"
                     size="sm"
-                    onClick={() => navigate("/app")}
+                    onClick={() => navigate("/app/order")}
                   >
                     Login
                   </Button>
@@ -172,11 +172,11 @@ export const App = () => {
       </div>
 
       <Container>
-        <Suspense fallback={<div>Loading...</div>}>
-          <UserContext.Provider value={user}>
+        <UserContext.Provider value={user}>
+          <Suspense fallback={<div>Loading...</div>}>
             <Outlet />
-          </UserContext.Provider>
-        </Suspense>
+          </Suspense>
+        </UserContext.Provider>
       </Container>
 
       <footer className="my-5 pt-5 text-body-secondary text-center text-small">
