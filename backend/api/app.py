@@ -182,7 +182,7 @@ def motors_shows(type_motor):
         'data': clearResponse(data)
     }, status_code=code, headers=contentTypes['object'])
 
-@app.route('/orders', methods=['GET'], cors=True, authorizer=authorizer)
+@app.route('/orders', methods=['GET'], cors=True, authorizer=authorizer, content_types=contentTypes['array'])
 def order_index():
     code = 200
 
@@ -209,7 +209,7 @@ def order_index():
             'data': None,
         }, status_code=code, headers=contentTypes['object'])
 
-@app.route('/orders/{id}', methods=['GET'], cors=True, authorizer=authorizer)
+@app.route('/orders/{id}', methods=['GET'], cors=True, authorizer=authorizer, content_types=contentTypes['array'])
 def order_detail(id):
     code = 200
 
@@ -217,7 +217,7 @@ def order_detail(id):
         context = app.current_request.context['authorizer']['claims']
         userId = context['sub']
 
-        data = show({ "pk": "ORDERS", "sk": id })
+        data = show({ "pk": "ORDERS", "sk": str(id) })
 
         if data == False:
             code = 404
