@@ -28,8 +28,8 @@ Amplify.configure({
 });
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <HelmetProvider>
-    <React.StrictMode>
+  <React.StrictMode>
+    <HelmetProvider>
       <SWRConfig
         value={{
           refreshInterval: 30000,
@@ -55,6 +55,6 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       >
         <RouterProvider router={router} />
       </SWRConfig>
-    </React.StrictMode>
-  </HelmetProvider>
+    </HelmetProvider>
+  </React.StrictMode>
 );
