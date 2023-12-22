@@ -1,6 +1,5 @@
 import { Suspense, useEffect, useState } from "react";
-import { Outlet } from "react-router-dom";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, Outlet } from "react-router-dom";
 import { APP_NAME } from "./statics";
 import { Button, Container, Nav, NavDropdown } from "react-bootstrap";
 import {
@@ -95,16 +94,10 @@ export const App = () => {
 
             <nav className="d-inline-flex mt-2 mt-md-0 ms-md-auto">
               <Link
-                to="#"
+                to="/about"
                 className="me-3 py-2 link-body-emphasis text-decoration-none"
               >
-                Features
-              </Link>
-              <Link
-                to="#"
-                className="me-3 py-2 link-body-emphasis text-decoration-none"
-              >
-                Support
+                About Us
               </Link>
               {isAuthenticated ? (
                 <>
