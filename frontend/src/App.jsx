@@ -99,6 +99,14 @@ export const App = () => {
               >
                 About Us
               </Link>
+
+              <a
+                className="me-3 py-2 link-body-emphasis text-decoration-none"
+                href="https://github.com/JuniYadi/motor-rent"
+              >
+                GitHub
+              </a>
+
               {isAuthenticated ? (
                 <>
                   <Link
