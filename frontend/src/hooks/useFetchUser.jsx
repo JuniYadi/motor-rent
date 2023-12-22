@@ -5,12 +5,15 @@ import { API_URL } from "../statics";
 export function useFetchUser(url, options) {
   const [response, setResponse] = useState(null);
   const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const user = useContext(UserContext);
 
   useEffect(() => {
     async function getData() {
       try {
         if (user && user.tokens) {
+          setIsLoading(true);
+
           const res = await fetch(`${API_URL}/${url}`, {
             ...options,
             headers: {
@@ -22,12 +25,14 @@ export function useFetchUser(url, options) {
 
           if (res.ok) {
             const json = await res.json();
+            setIsLoading(false);
             setResponse(json.data);
           } else {
             throw res;
           }
         }
       } catch (error) {
+        setIsLoading(false);
         setError(error);
       }
     }
@@ -35,5 +40,5 @@ export function useFetchUser(url, options) {
     getData();
   }, [url, options, user]);
 
-  return { response, error, user };
+  return { response, error, isLoading, user };
 }
