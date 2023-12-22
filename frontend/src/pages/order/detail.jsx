@@ -1,41 +1,15 @@
-import { useContext, useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams } from "react-router-dom";
 import { Card, Col, Form, Row } from "react-bootstrap";
-import axios from "axios";
 
-import { API_URL, APP_NAME } from "../../statics";
-import { UserContext } from "../../contexts";
+import { APP_NAME } from "../../statics";
 import { rupiah } from "../../utils/currency";
 import { metodePembayaran } from "../../utils/payments";
+import { useFetchUser } from "../../hooks/useFetchUser";
 
 export default function OrderDetail() {
   const { id } = useParams();
-  const user = useContext(UserContext);
-  const [order, setOrder] = useState(null);
-
-  useEffect(() => {
-    async function getData() {
-      if (user && user.tokens) {
-        const req = await axios.get(`${API_URL}/orders/${id}`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user.tokens}`,
-          },
-        });
-
-        if (req.data.data) {
-          setOrder(req.data.data);
-        } else {
-          alert("Order not found");
-        }
-      }
-    }
-
-    getData();
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { response: order, isLoading } = useFetchUser(`orders/${id}`);
 
   return (
     <>
@@ -45,7 +19,9 @@ export default function OrderDetail() {
 
       <h2 className="text-capitalize">Order Detail {id}</h2>
 
-      {order ? (
+      {isLoading && !order ? (
+        <p>Loading...</p>
+      ) : (
         <>
           <Card className="mb-2">
             <Card.Header>Detail Order</Card.Header>
@@ -125,8 +101,6 @@ export default function OrderDetail() {
             </Card.Body>
           </Card>
         </>
-      ) : (
-        <p>Loading...</p>
       )}
     </>
   );

@@ -51,7 +51,7 @@ export default function OrderNew() {
   ]);
   const [location, setLocation] = useState([]);
   const [stock, setStock] = useState(0);
-  const [validated, setValidated] = useState(false);
+  const [validated, setValidated] = useState(null);
 
   const [searchParams] = useSearchParams();
   const name = searchParams.get("name");
@@ -97,8 +97,9 @@ export default function OrderNew() {
 
     const form = event.currentTarget;
     if (form.checkValidity() === false) {
-      event.stopPropagation();
       setValidated(false);
+
+      event.stopPropagation();
     } else {
       setValidated(true);
 

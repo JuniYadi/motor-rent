@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 import { useFetchUser } from "../../hooks/useFetchUser";
 
 export default function OrderDetail() {
-  const { response: order } = useFetchUser(`orders`);
+  const { response: order, isLoading } = useFetchUser(`orders`);
 
   return (
     <>
@@ -17,7 +17,9 @@ export default function OrderDetail() {
 
       <h2 className="text-capitalize">Order Lists</h2>
 
-      {order ? (
+      {isLoading && !order ? (
+        <p>Loading...</p>
+      ) : (
         <>
           <Card className="mb-2">
             <Card.Body>
@@ -32,26 +34,26 @@ export default function OrderDetail() {
                   </tr>
                 </thead>
                 <tbody>
-                  {order.map((item) => (
-                    <tr key={item.id}>
-                      <td>{item.id}</td>
-                      <td>{item.createdAt}</td>
-                      <td>{item.status}</td>
-                      <td>{rupiah(item.total)}</td>
-                      <td>
-                        <Link to={`/app/order/${item.id}`}>
-                          <a className="btn btn-primary btn-sm">Detail</a>
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
+                  {!isLoading &&
+                    order &&
+                    order.map((item) => (
+                      <tr key={item.id}>
+                        <td>{item.id}</td>
+                        <td>{item.createdAt}</td>
+                        <td>{item.status.replace("_", " ")}</td>
+                        <td>{rupiah(item.total)}</td>
+                        <td>
+                          <Link to={`/app/order/${item.id}`}>
+                            <a className="btn btn-primary btn-sm">Detail</a>
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </Table>
             </Card.Body>
           </Card>
         </>
-      ) : (
-        <p>Loading...</p>
       )}
     </>
   );
