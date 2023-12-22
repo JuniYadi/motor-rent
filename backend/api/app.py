@@ -1,7 +1,7 @@
 from chalice import Chalice, CognitoUserPoolAuthorizer, Response
 from chalicelib.db import query, store, show, update
 from chalicelib.id import id
-from chalicelib.duitku import duitku_create, duitku_payment_code, duitku_singature_validate
+from chalicelib.duitku import duitku_create, duitku_payment_code, duitku_callback_validate
 from datetime import datetime
 from chalicelib.cleanup import clearResponse
 from urllib.parse import parse_qs
@@ -46,19 +46,27 @@ def location_detail():
 def location_detail():
     try:
         current_request = app.current_request
-        body = parse_qs(app.current_request.raw_body.decode())
+        body = parse_qs(app.current_request.raw_body.decode('utf-8'))
 
-        print("callback", body)
+        merchantOrderId = body.get("merchantOrderId", None)[0]
+        reference = body.get("reference", None)[0]
+        paymentCode = body.get("paymentCode", None)[0]
+        signature = body.get("signature", None)[0]
+        amount = body.get("amount", None)[0]
+        publisherOrderId = body.get("publisherOrderId", None)[0]
+        settlementDate = body.get("settlementDate", None)[0]
 
-        merchantOrderId = body.get("merchantOrderId", None)
-        reference = body.get("reference", None)
-        paymentCode = body.get("paymentCode", None)
-        signature = body.get("signature", None)
-        amount = body.get("amount", None)
-        publisherOrderId = body.get("publisherOrderId", None)
-        settlementDate = body.get("settlementDate", None)
+        print({
+            "merchantOrderId": merchantOrderId,
+            "reference": reference,
+            "paymentCode": paymentCode,
+            "signature": signature,
+            "amount": amount,
+            "publisherOrderId": publisherOrderId,
+            "settlementDate": settlementDate
+        })
 
-        validateSignature = duitku_singature_validate(signature, merchantOrderId=merchantOrderId, paymentAmount=amount)
+        validateSignature = duitku_callback_validate(signature, merchantOrderId=merchantOrderId, paymentAmount=amount)
 
         if validateSignature == False:
             raise Exception('Signature not valid')
@@ -108,9 +116,10 @@ def location_detail():
             'message': 'success',
         }, status_code=200)
     except Exception as e:
+        print("callback error", e)
         return Response(body={
             'code': 500,
-            'message': str(e),
+            'message': str(e or 'Internal Server Error'),
             'data': None,
         }, status_code=500)    
 

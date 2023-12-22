@@ -61,10 +61,13 @@ def duitku_payment_code(code):
 def duitku_signature(**kwargs):
   return hashlib.md5((DUITKU_MERCHANT_CODE + kwargs['merchantOrderId'] + str(kwargs['paymentAmount']) + DUITKU_API_KEY).encode('utf-8')).hexdigest()
 
-def duitku_singature_validate(sign, **kwargs):
-  signature = duitku_signature(**kwargs)
+def duitku_callback_validate(sign, **kwargs):
+  merchantOrderId = kwargs['merchantOrderId']
+  paymentAmount = kwargs['paymentAmount']
 
-  return signature == sign
+  signature = f"{DUITKU_MERCHANT_CODE}{paymentAmount}{merchantOrderId}{DUITKU_API_KEY}"
+  signatureMD5 = hashlib.md5(signature.encode('utf-8')).hexdigest()
+  return signatureMD5 == sign
 
 def duitku_create(**kwargs):
   payload = { 
