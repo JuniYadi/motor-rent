@@ -9,27 +9,40 @@ export default function About() {
       </Helmet>
       <h3>About</h3>
       <p>
-        Project ini dibuat untuk memenuhi tugas mata kuliah{" "}
-        <b>Teknologi Cloud Computing</b> dengan dosen pengampu{" "}
-        <b>INDRA BUDI T., ST., M.KOM </b> pada semester <b>GASAL (2023-2024)</b>{" "}
-        di <b>Universitas Widya Kartika (Surabaya, Jawa Timur, Indonesia)</b>.
+        Project ini dibuat untuk memenuhi tugas mata kuliah:
+        <ul>
+          <li>
+            <b>Analisa dan Desain Sistem (ADS)</b> dengan dosen pengampu{" "}
+            <b>INDRA BUDI T., ST., M.KOM</b>
+          </li>
+          <li>
+            <b>Sistem Informasi (SI)</b> dengan dosen pengampu{" "}
+            <b>YONATAN WIDIANTO, S.Kom., M.Kom.</b>
+          </li>
+          <li>
+            <b>SISTEM BASIS DATA (SBD)</b> dengan dosen pengampu{" "}
+            <b>ROBBY KURNIAWAN BUDHI, S.Kom., M.Kom.</b>
+          </li>
+        </ul>
+        pada semester <b>GASAL (2023-2024)</b> di{" "}
+        <b>Universitas Widya Kartika (Surabaya, Jawa Timur, Indonesia)</b>.
       </p>
       <h3>Tujuan Project</h3>
       <p>
         <ul>
           <li>
-            Membuat aplikasi catatan sederhana yang dapat digunakan oleh
-            pengguna untuk membuat catatan.
+            Mengembangkan Aplikasi yang User-Friendly: Membuat aplikasi yang
+            intuitif, mudah digunakan, dan dapat diakses oleh berbagai jenis
+            pengguna, termasuk mereka yang kurang berpengalaman dalam teknologi.
           </li>
           <li>
-            Memanfaatkan teknologi cloud untuk membuat aplikasi catatan
-            sederhana.
+            Mengelola Ketersediaan Motor: Memastikan bahwa motor tersedia dalam
+            jumlah yang mencukupi untuk memenuhi permintaan pelanggan, terutama
+            di area yang ramai.
           </li>
-          <li>
-            Mampu menghandle request yang masuk ke aplikasi dengan baik dan
-            ketika load aplikasi meningkat, aplikasi tetap dapat berjalan dengan
-            baik.
-          </li>
+          <li>Meningkatkan Keamanan dan Kepercayaan</li>
+          <li>Memperluas Cakupan Area</li>
+          <li>Meningkatkan Efisiensi Operasional</li>
         </ul>
       </p>
 
